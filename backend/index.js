@@ -2,6 +2,8 @@ var app = require("express")();
 var http = require("http").createServer(app);
 var io = require("socket.io")(http);
 
+var count = 0;
+
 app.get("/", (req, res) => {
   res.write(`<html>
     <head>
@@ -61,7 +63,7 @@ app.get("/", (req, res) => {
         var socket = io();
         $("form").submit(function (e) {
           e.preventDefault(); // prevents page reloading
-          socket.emit("chat message", 'Web User: ' + $("#m").val());
+          socket.emit("chat message", $("#m").val());
           $("#m").val("");
           return false;
         });
@@ -78,13 +80,15 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+  count++;
+  var username = `User${count}: `;
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 
   socket.on("chat message", (msg) => {
     console.log(msg);
-    io.emit("chat message", msg);
+    io.emit("chat message", username + msg);
   });
 });
 

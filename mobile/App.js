@@ -12,14 +12,14 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    this.socket = io('http://192.168.1.7:3000/');
+    this.socket = io('http://localhost:3000/');
     this.socket.on("chat message", msg => {
       this.setState({ chatMessages: [...this.state.chatMessages, msg] });
     });
   }
 
   submitChatMessage() {
-    this.socket.emit("chat message", 'Mobile: ' + this.state.chatMessage);
+    this.socket.emit("chat message", this.state.chatMessage);
     this.setState({ chatMessage: "" });
   }
 
