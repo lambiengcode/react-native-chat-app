@@ -3,6 +3,7 @@ var http = require("http").createServer(app);
 var io = require("socket.io")(http);
 
 var count = 0;
+var messages = [];
 
 app.get("/", (req, res) => {
   res.write(`<html>
@@ -67,6 +68,9 @@ app.get("/", (req, res) => {
           $("#m").val("");
           return false;
         });
+        socket.on("msg", function (history) {
+          history.forEach(e=>$("#messages").append($("<li>").text(e)));
+        });
         socket.on("chat message", function (msg) {
           $("#messages").append($("<li>").text(msg));
         });
@@ -79,18 +83,29 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log(socket.client.id);
   count++;
   var username = `User${count}: `;
+
+  // Below code will be send history messages for new user
+  socket.emit("msg", messages);
+  
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 
   socket.on("chat message", (msg) => {
-    console.log(msg);
+    messages.push(username + msg);
     io.emit("chat message", username + msg);
   });
 });
+
+function appendMessage(username, msg) {
+  messages.push({
+    username: username,
+    msg: msg,
+  });
+}
 
 http.listen(3000, '0.0.0.0', function() {
     console.log('Listening to port:  ' + 3000);
